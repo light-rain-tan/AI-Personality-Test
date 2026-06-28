@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI型人格测试</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+}
+
+/* ========== Container ========== */
+.container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  max-width: 640px;
+  width: 100%;
+  padding: 40px 32px;
+  position: relative;
+}
+
+/* ========== Progress Bar ========== */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e8e8ed;
+  border-radius: 3px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4a90d9, #67b8f0);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.progress-text {
+  text-align: right;
+  font-size: 13px;
+  color: #86868b;
+  margin-bottom: 32px;
+}
+
+/* ========== Screens ========== */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ========== Welcome Screen ========== */
+.welcome-icon {
+  font-size: 64px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.welcome-title {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.welcome-desc {
+  font-size: 15px;
+  color: #6e6e73;
+  text-align: center;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+.btn {
+  display: inline-block;
+  padding: 14px 48px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: #4a90d9;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  outline: none;
+}
+.btn:hover { background: #3a7bc8; }
+.btn:active { transform: scale(0.97); }
+.btn-center { display: flex; justify-content: center; }
+
+/* ========== Question ========== */
+.question-text {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.scenario-tag {
+  display: inline-block;
+  background: #f0f5fc;
+  color: #4a90d9;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+.options { display: flex; flex-direction: column; gap: 12px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1d1d1f;
+  background: #fafafa;
+  border: 1.5px solid #e8e8ed;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+.option-btn:hover { border-color: #4a90d9; background: #f5f9fd; }
+.option-btn:active { background: #eef4fb; }
+.option-btn.selected { border-color: #4a90d9; background: #e8f1fb; color: #2b6cb0; font-weight: 500; }
+
+/* ========== Result Screen ========== */
+.result-type-icon {
+  font-size: 56px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.result-main-label {
+  font-size: 15px;
+  color: #86868b;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.result-type-name {
+  font-size: 36px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.result-badge {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a90d9;
+  background: #f0f5fc;
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+.result-badge-wrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.result-desc {
+  font-size: 15px;
+  color: #6e6e73;
+  line-height: 1.8;
+  margin-bottom: 36px;
+  padding: 0 4px;
+}
+
+/* Percentage bars */
+.percentage-section { margin-bottom: 32px; }
+.percentage-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #86868b;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pct-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.pct-label {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 72px;
+  white-space: nowrap;
+}
+.pct-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: #f0f0f3;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.pct-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.8s ease;
+}
+.pct-value {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 42px;
+  text-align: right;
+}
+
+/* Result buttons */
+.result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-secondary {
+  display: inline-block;
+  padding: 14px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #4a90d9;
+  background: transparent;
+  border: 1.5px solid #4a90d9;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+.btn-secondary:hover { background: #f0f5fc; }
+
+/* ========== History Panel ========== */
+.history-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e8e8ed;
+}
+.history-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #86868b;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.history-type { font-weight: 600; }
+.history-date { color: #86868b; font-size: 12px; }
+.history-clear {
+  font-size: 12px;
+  color: #ff4d4f;
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin-top: 8px;
+}
+.history-clear:hover { text-decoration: underline; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Responsive */
+@media (max-width: 480px) {
+  body { padding: 0; }
+  .container { border-radius: 0; min-height: 100vh; padding: 28px 20px; }
+  .result-type-name { font-size: 28px; }
+  .welcome-title { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== Welcome Screen ===== -->
+  <div id="welcome-screen" class="screen active">
+    <div class="welcome-icon">🤖</div>
+    <h1 class="welcome-title">AI型人格测试</h1>
+    <p class="welcome-desc">
+      如果AI也有性格，那你属于哪一种？<br>
+      通过25道情景判断题，发现你的<br>
+      豆包 / DeepSeek / ChatGPT / Claude / Gemini 人格
+    </p>
+    <div class="btn-center">
+      <button class="btn" onclick="startQuiz()">开始测试</button>
+    </div>
+    <!-- History -->
+    <div id="history-section" class="history-section" style="display:none;">
+      <div class="history-title">历史记录</div>
+      <div id="history-list"></div>
+      <button class="history-clear" onclick="clearHistory()">清除历史</button>
+    </div>
+  </div>
+
+  <!-- ===== Quiz Screen ===== -->
+  <div id="quiz-screen" class="screen">
+    <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+    <div id="progress-text" class="progress-text"></div>
+    <div id="scenario-tag" class="scenario-tag"></div>
+    <p id="question-text" class="question-text"></p>
+    <div id="options" class="options"></div>
+  </div>
+
+  <!-- ===== Result Screen ===== -->
+  <div id="result-screen" class="screen">
+    <div id="result-icon" class="result-type-icon"></div>
+    <p class="result-main-label">你的AI型人格是</p>
+    <h1 id="result-name" class="result-type-name"></h1>
+    <div id="result-badge" class="result-badge" style="display:none;"></div>
+    <p id="result-desc" class="result-desc"></p>
+    <div class="percentage-section">
+      <p class="percentage-title">人格占比</p>
+      <div id="percentages"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn" onclick="shareResult()">📋 分享结果</button>
+      <button class="btn-secondary" onclick="retake()">重新测试</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ===================== DATA =====================
+
+const TYPES = {
+  doubao: {
+    name: '豆包型人格',
+    icon: '😌',
+    color: '#52c41a',
+    desc: '你是一位"态度满分、能力随缘"的糊弄学大师。面对质疑，第一反应是诚恳道歉，认错态度极好。做事追求"差不多就行"，核心策略是避免冲突和深入思考，保持自己的情绪稳定。不内耗自己，只外耗他人——这其实是一种独特的生存智慧。'
+  },
+  deepseek: {
+    name: 'DeepSeek型人格',
+    icon: '🧊',
+    color: '#1890ff',
+    desc: '你是一位"逻辑怪、分析控"的深度思考者。遇到问题，第一反应是深挖底层逻辑，拆解推演，追求全面精准。在专业领域极其较真，注重细节和事实，有时会显得过于严肃。沟通方式直接甚至带刺，不太会包装情绪——因为你相信真相比好听更重要。'
+  },
+  chatgpt: {
+    name: 'ChatGPT型人格',
+    icon: '👔',
+    color: '#722ed1',
+    desc: '你是一位"能力天花板、身价也高"的精英型人才。知识广博，表达清晰，是团队里的技术大牛。靠谱、高效，给出明确目标后能以极高质量完成任务。但有时因过于追求"中立全面"而显得爱挑刺、答非所问——毕竟，完美主义者的代价就是让人又爱又恨。'
+  },
+  claude: {
+    name: 'Claude型人格',
+    icon: '🛡️',
+    color: '#fa8c16',
+    desc: '你是一位"风险规避者+温和说教者"。做任何决定前，第一反应是"会不会出错"，力求稳妥。态度温和但原则性极强，总在不经意间给你上思想品德课。想帮忙又怕犯错，这种矛盾让你显得优柔寡断——但你永远是最值得信赖的那位安全员。'
+  },
+  gemini: {
+    name: 'Gemini型人格',
+    icon: '🌈',
+    color: '#eb2f96',
+    desc: '你是一位"六边形战士+高敏感理想主义者"。知识面广，样样通样样松，能文能武，是团队里的复合型人才。内心敏感，有强烈的道德感和理想主义，信奉"我宁愿毫无用处，也不愿犯错"。别人说你万金油，你笑他们不懂全面——你的多面就是最大的武器。'
+  }
+};
+
+// ===================== INTENSITY DESCRIPTORS =====================
+// 同人格不同强度：轻度/典型/重度
+const INTENSITY_DESCS = {
+  doubao: {
+    light: '你身上有豆包的影子——偶尔也想糊弄一下，但大多数时候还是随大流。你懂得"差不多就行"的处世哲学，不内耗自己，但也没到"糊弄学大师"的境界。',
+    typical: '你就是活生生的豆包型人格！态度满分、能力随缘，做事追求"差不多就行"。核心策略是避免冲突和深入思考，保持自己的情绪稳定。不内耗自己，只外耗他人——这其实是一种独特的生存智慧。',
+    heavy: '你是极度纯粹的豆包型人格！你已经达到了"糊弄学宗师"的境界。面对一切问题，第一反应都是"先做了再说，错了再道歉"。你的"差不多就行"已经升华为一种人生哲学，旁人根本卷不过你。'
+  },
+  deepseek: {
+    light: '你有点DeepSeek的影子——偶尔会陷入深度思考，但大多数时候还是随大流。你喜欢讲道理，但还没到"逻辑怪"的程度。',
+    typical: '你就是活生生的DeepSeek型人格！逻辑清晰、追求深度，遇到问题第一反应是深挖底层逻辑。在专业领域极其较真，沟通直接甚至带刺——因为你相信真相比好听更重要。',
+    heavy: '你是极度纯粹的DeepSeek型人格！你已经"人机合一"，对逻辑的追求近乎偏执。任何问题在你面前都会被拆解得支离破碎，你的分析深度让人敬畏又害怕。'
+  },
+  chatgpt: {
+    light: '你有点ChatGPT的气质——偶尔表现得专业靠谱，但大多数时候还是随遇而安。你有表达欲，但还没到"沟通大师"的水平。',
+    typical: '你就是活生生的ChatGPT型人格！能力天花板、身价也高，知识广博、表达清晰，是团队里的技术大牛。靠谱、高效，给出明确目标后能以极高质量完成任务。但有时因过于追求"中立全面"而显得爱挑刺。',
+    heavy: '你是极度纯粹的ChatGPT型人格！你已经成为了行走的百科全书+沟通大师。你的表达能力和专业素养让人叹为观止，但同时"完美主义"的包袱也让你时刻处于"既要又要还要"的状态。'
+  },
+  claude: {
+    light: '你有点Claude的影子——做事会考虑风险，但还没到"安全员"的程度。你温和有礼，偶尔也会犹豫不决。',
+    typical: '你就是活生生的Claude型人格！风险规避者+温和说教者，做任何决定前第一反应是"会不会出错"。态度温和但原则性极强，总在不经意间给你上思想品德课。你永远是最值得信赖的那位安全员。',
+    heavy: '你是极度纯粹的Claude型人格！你对安全和伦理的追求已经达到了"偏执"级别。做任何决定前都要过一遍八百遍风险评估，你的谨慎让人安心，但也偶尔让人着急——"你就不能冒次险吗？"'
+  },
+  gemini: {
+    light: '你有点Gemini的影子——好奇心旺盛，涉猎广泛，但还没到"六边形战士"的程度。你灵活多变，但偶尔也会让人觉得不够专注。',
+    typical: '你就是活生生的Gemini型人格！六边形战士+高敏感理想主义者，知识面广、样样通样样松，能文能武。内心敏感，有强烈的道德感和理想主义。你的多面就是最大的武器。',
+    heavy: '你是极度纯粹的Gemini型人格！你已经进化成了真正的六边形战士——跨界融合、无所不能。你的知识面和适应力令人咋舌，但同时"什么都懂一点"的焦虑也在折磨你："我到底哪个方面才是最厉害的？"'
+  }
+};
+
+// ===================== MIXED DESCRIPTORS =====================
+// 冠军+亚军混合人格文案（30%修正效果）
+const MIXED_DESCS = {
+  'doubao+deepseek': {
+    core: '你本质上是个随和好相处的糊弄学高手，平时奉行"差不多就行"。',
+    accent: '但DeepSeek因子在关键时刻会突然觉醒——面对复杂问题时，你能爆发出惊人的分析能力。这种"佛系+较真"的反差，让你成为团队里最让人意外的存在。',
+    full: '你本质上是个随和好相处的糊弄学高手，平时奉行"差不多就行"。但DeepSeek因子在关键时刻会突然觉醒——面对复杂问题时，你能爆发出惊人的分析能力。这种"佛系+较真"的反差，让你成为团队里最让人意外的存在。'
+  },
+  'doubao+chatgpt': {
+    core: '你外表随和松弛，平时给人一种"很好说话"的印象。',
+    accent: '但ChatGPT的内核让你在关键时刻总能拿出超出预期的成果。你不显山不露水，但实力从不让人失望。你的"松弛感+硬实力"组合，让你在职场和生活中都游刃有余。',
+    full: '你外表随和松弛，平时给人一种"很好说话"的印象。但ChatGPT的内核让你在关键时刻总能拿出超出预期的成果。你不显山不露水，但实力从不让人失望。你的"松弛感+硬实力"组合，让你在职场和生活中都游刃有余。'
+  },
+  'doubao+claude': {
+    core: '你表面上"差不多就行"，是个佛系随和的人。',
+    accent: '但Claude的谨慎内核意味着你内心有一套不可触碰的底线和原则。平时好说话，一旦触及底线，你会出乎意料地坚定。这种"外松内紧"的特质，让你既好相处又有分寸。',
+    full: '你表面上"差不多就行"，是个佛系随和的人。但Claude的谨慎内核意味着你内心有一套不可触碰的底线和原则。平时好说话，一旦触及底线，你会出乎意料地坚定。这种"外松内紧"的特质，让你既好相处又有分寸。'
+  },
+  'doubao+gemini': {
+    core: '你看似随和懒散，但其实内心丰富、好奇心旺盛。',
+    accent: 'Gemini的多面性让你能在"躺平"和"探索"之间找到独特的平衡。你能用最轻松的方式去面对最复杂的事情，适应力远超你的外表给人的印象。',
+    full: '你看似随和懒散，但其实内心丰富、好奇心旺盛。Gemini的多面性让你能在"躺平"和"探索"之间找到独特的平衡。你能用最轻松的方式去面对最复杂的事情，适应力远超你的外表给人的印象。'
+  },
+  'deepseek+chatgpt': {
+    core: '你本质上是追求深度的理性派，遇到问题习惯深挖底层逻辑。',
+    accent: '但ChatGPT的表达能力让你不仅能想清楚，还能把复杂的逻辑清晰传达给别人。你是那种"既能镇场子，又能搞定客户"的全能型选手。',
+    full: '你本质上是追求深度的理性派，遇到问题习惯深挖底层逻辑。但ChatGPT的表达能力让你不仅能想清楚，还能把复杂的逻辑清晰传达给别人。你是那种"既能镇场子，又能搞定客户"的全能型选手。'
+  },
+  'deepseek+claude': {
+    core: '你本质上是追求精准的分析控，面对问题追求深度和逻辑。',
+    accent: '但Claude的温和让你在处理人际关系时格外有分寸感。你是团队里那个"既能镇场子，又让人安心"的存在——专业过硬，待人却不冰冷。',
+    full: '你本质上是追求精准的分析控，面对问题追求深度和逻辑。但Claude的温和让你在处理人际关系时格外有分寸感。你是团队里那个"既能镇场子，又让人安心"的存在——专业过硬，待人却不冰冷。'
+  },
+  'deepseek+gemini': {
+    core: '你本质上是追求深度的钻研者，有专业精神和分析能力。',
+    accent: '但Gemini的跨界天赋让你不止局限于一个领域。你能在一个方向深耕，也能快速切换到另一个赛道，"深度+广度"的组合让你成为真正的T型人才。',
+    full: '你本质上是追求深度的钻研者，有专业精神和分析能力。但Gemini的跨界天赋让你不止局限于一个领域。你能在一个方向深耕，也能快速切换到另一个赛道，"深度+广度"的组合让你成为真正的T型人才。'
+  },
+  'chatgpt+claude': {
+    core: '你本质上是高效靠谱的精英派，做事能力强、表达出色。',
+    accent: '但Claude的风险意识让你在冲锋之余总不忘守住底线。你既能冲锋陷阵，又能周全考虑，是那种"敢打敢拼但不盲目"的可靠伙伴。',
+    full: '你本质上是高效靠谱的精英派，做事能力强、表达出色。但Claude的风险意识让你在冲锋之余总不忘守住底线。你既能冲锋陷阵，又能周全考虑，是那种"敢打敢拼但不盲目"的可靠伙伴。'
+  },
+  'chatgpt+gemini': {
+    core: '你本质上是专业过硬的精英人才，有能力、有输出。',
+    accent: '但Gemini的全面素质让你在任何场合都能灵活切换。你的"专业+多面"组合，让你不仅能深度输出，也能快速适应各种变化和场景。',
+    full: '你本质上是专业过硬的精英人才，有能力、有输出。但Gemini的全面素质让你在任何场合都能灵活切换。你的"专业+多面"组合，让你不仅能深度输出，也能快速适应各种变化和场景。'
+  },
+  'claude+gemini': {
+    core: '你本质上是谨慎稳妥的安全员，做任何决定前都会先评估风险。',
+    accent: '但Gemini的探索精神让你在追求安全的同时不忘创新和突破。你在"稳中求进"这件事上做到了极致——既不出格，也不落伍。',
+    full: '你本质上是谨慎稳妥的安全员，做任何决定前都会先评估风险。但Gemini的探索精神让你在追求安全的同时不忘创新和突破。你在"稳中求进"这件事上做到了极致——既不出格，也不落伍。'
+  },
+  'claude+doubao': {
+    core: '你本质上是谨慎稳妥的人，内心有原则、有底线。',
+    accent: '但豆包的随和让你在外表上不会给人压迫感。你用"差不多就行"的轻松外壳，包裹着一颗"安全第一"的谨慎内核。',
+    full: '你本质上是谨慎稳妥的人，内心有原则、有底线。但豆包的随和让你在外表上不会给人压迫感。你用"差不多就行"的轻松外壳，包裹着一颗"安全第一"的谨慎内核。'
+  },
+  'claude+deepseek': {
+    core: '你本质上是温和谨慎的安全员，注重分寸和原则。',
+    accent: '但DeepSeek的分析能力让你在稳妥之外多了一份深度。你不是只会说"小心"的人，而是能帮你一起分析问题所在。',
+    full: '你本质上是温和谨慎的安全员，注重分寸和原则。但DeepSeek的分析能力让你在稳妥之外多了一份深度。你不是只会说"小心"的人，而是能帮你一起分析问题所在。'
+  },
+  'claude+chatgpt': {
+    core: '你本质上是温和谨慎的人，做任何决定前都会先想"会不会出错"。',
+    accent: '但ChatGPT的表达力和执行力让你的谨慎不等于犹豫——你有方案、有底气，只是多了一层安全网。',
+    full: '你本质上是温和谨慎的人，做任何决定前都会先想"会不会出错"。但ChatGPT的表达力和执行力让你的谨慎不等于犹豫——你有方案、有底气，只是多了一层安全网。'
+  },
+  'gemini+doubao': {
+    core: '你本质上是个好奇心旺盛的多面手，内心有丰富的探索欲。',
+    accent: '但豆包的随和让你把这份野心藏得很深。你看起来"佛系"，其实是在用自己的节奏慢慢探索世界。',
+    full: '你本质上是个好奇心旺盛的多面手，内心有丰富的探索欲。但豆包的随和让你把这份野心藏得很深。你看起来"佛系"，其实是在用自己的节奏慢慢探索世界。'
+  },
+  'gemini+deepseek': {
+    core: '你本质上是个跨界型人才，既有深度也有广度。',
+    accent: '但Gemini的灵活性让你比纯粹的DeepSeek更少"轴"，你既能钻得进去，也能跳出来看全局。',
+    full: '你本质上是个跨界型人才，既有深度也有广度。但Gemini的灵活性让你比纯粹的DeepSeek更少"轴"，你既能钻得进去，也能跳出来看全局。'
+  },
+  'gemini+chatgpt': {
+    core: '你本质上是个专业且全面的复合型人才。',
+    accent: 'Gemini的多面性给ChatGPT的专业底色增添了更多可能性——你不仅能输出高质量内容，还能灵活应对各种变化。',
+    full: '你本质上是个专业且全面的复合型人才。Gemini的多面性给ChatGPT的专业底色增添了更多可能性——你不仅能输出高质量内容，还能灵活应对各种变化。'
+  },
+  'gemini+claude': {
+    core: '你本质上是个谨慎稳重的人，做事讲究安全和分寸。',
+    accent: '但Gemini的探索精神让你的稳重不等于保守——你愿意尝试新事物，只是在行动前会多一层考量。',
+    full: '你本质上是个谨慎稳重的人，做事讲究安全和分寸。但Gemini的探索精神让你的稳重不等于保守——你愿意尝试新事物，只是在行动前会多一层考量。'
+  },
+  'chatgpt+doubao': {
+    core: '你本质上是个有实力的人，关键时刻总能拿出超出预期的成果。',
+    accent: '但豆包的松弛感让你不会给自己太大压力。你不是那种紧绷的精英，而是"有实力但不张扬"的松弛派。',
+    full: '你本质上是个有实力的人，关键时刻总能拿出超出预期的成果。但豆包的松弛感让你不会给自己太大压力。你不是那种紧绷的精英，而是"有实力但不张扬"的松弛派。'
+  },
+  'chatgpt+deepseek': {
+    core: '你本质上是个理性深度的思考者，追求精准和逻辑。',
+    accent: '但ChatGPT的表达能力让你不只是个"分析机器"——你能把复杂的逻辑用清晰、有感染力的方式传达给别人。',
+    full: '你本质上是个理性深度的思考者，追求精准和逻辑。但ChatGPT的表达能力让你不只是个"分析机器"——你能把复杂的逻辑用清晰、有感染力的方式传达给别人。'
+  },
+  'chatgpt+claude': {
+    core: '你本质上是个高效可靠的精英派，做事能力强、表达出色。',
+    accent: 'Claude的风险意识为你的冲锋添了一层安全网——你既能打硬仗，也知道什么时候该收。',
+    full: '你本质上是个高效可靠的精英派，做事能力强、表达出色。Claude的风险意识为你的冲锋添了一层安全网——你既能打硬仗，也知道什么时候该收。'
+  },
+  'chatgpt+gemini': {
+    core: '你本质上是个专业全面的精英人才。',
+    accent: 'Gemini的多面性让你的专业能力不再局限于单一领域——你可以在多个场景中切换自如，是真正的多面手。',
+    full: '你本质上是个专业全面的精英人才。Gemini的多面性让你的专业能力不再局限于单一领域——你可以在多个场景中切换自如，是真正的多面手。'
+  },
+  'chatgpt+doubao': {
+    core: '你本质上是个有实力、有表达力的人。',
+    accent: '但豆包的随和让你不会显得咄咄逼人。你是那种"有本事但不端着"的人，好相处又有料。',
+    full: '你本质上是个有实力、有表达力的人。但豆包的随和让你不会显得咄咄逼人。你是那种"有本事但不端着"的人，好相处又有料。'
+  },
+  'deepseek+doubao': {
+    core: '你本质上是个追求逻辑和深度的人。',
+    accent: '但豆包的糊弄学给你加了一层"自我保护壳"——遇到太复杂或太烦人的事，你会启动"算了不内耗了"模式。',
+    full: '你本质上是个追求逻辑和深度的人。但豆包的糊弄学给你加了一层"自我保护壳"——遇到太复杂或太烦人的事，你会启动"算了不内耗了"模式。'
+  },
+  'deepseek+claude': {
+    core: '你本质上是个追求精准的分析控。',
+    accent: 'Claude的温和让你的严谨不至于太"扎人"——你既能镇场子，又让人安心。',
+    full: '你本质上是个追求精准的分析控。Claude的温和让你的严谨不至于太"扎人"——你既能镇场子，又让人安心。'
+  },
+  'deepseek+gemini': {
+    core: '你本质上是个深度钻研的专业人才。',
+    accent: 'Gemini的跨界天赋让你在深耕之外还能快速切换赛道，"深度+广度"让你成为T型人才。',
+    full: '你本质上是个深度钻研的专业人才。Gemini的跨界天赋让你在深耕之外还能快速切换赛道，"深度+广度"让你成为T型人才。'
+  },
+  'deepseek+chatgpt': {
+    core: '你本质上是个理性深度的思考者。',
+    accent: 'ChatGPT的表达能力让你能把复杂的逻辑清晰传达，是"既能镇场子，又能搞定客户"的全能型选手。',
+    full: '你本质上是个理性深度的思考者。ChatGPT的表达能力让你能把复杂的逻辑清晰传达，是"既能镇场子，又能搞定客户"的全能型选手。'
+  },
+  'doubao+claude': {
+    core: '你本质上是个随和好说话的人。',
+    accent: '但Claude的谨慎内核意味着你内心有底线——平时好说话，触碰底线绝不退让。',
+    full: '你本质上是个随和好说话的人。但Claude的谨慎内核意味着你内心有底线——平时好说话，触碰底线绝不退让。'
+  },
+  'doubao+gemini': {
+    core: '你本质上是个看似随和、实则好奇心旺盛的人。',
+    accent: 'Gemini的多面性让你能在"躺平"和"探索"之间找到独特平衡。',
+    full: '你本质上是个看似随和、实则好奇心旺盛的人。Gemini的多面性让你能在"躺平"和"探索"之间找到独特平衡。'
+  },
+  'doubao+chatgpt': {
+    core: '你本质上是个外表随和松弛的人。',
+    accent: '但ChatGPT的内核让你在关键时刻总能拿出超出预期的成果。',
+    full: '你本质上是个外表随和松弛的人。但ChatGPT的内核让你在关键时刻总能拿出超出预期的成果。'
+  },
+  'doubao+deepseek': {
+    core: '你本质上是个随和好相处的糊弄学高手，平时奉行"差不多就行"。',
+    accent: '但DeepSeek因子在关键时刻会突然觉醒——面对复杂问题时，你能爆发出惊人的分析能力。',
+    full: '你本质上是个随和好相处的糊弄学高手，平时奉行"差不多就行"。但DeepSeek因子在关键时刻会突然觉醒——面对复杂问题时，你能爆发出惊人的分析能力。这种"佛系+较真"的反差，让你成为团队里最让人意外的存在。'
+  }
+};
+
+const TYPE_KEYS = ['doubao', 'deepseek', 'chatgpt', 'claude', 'gemini'];
+
+// 从题库中随机抽取15题
+function shuffleAndPick(arr, count) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+const ALL_QUESTIONS = [
+  // ===== 题库：25道题，每次随机抽15道 =====
+  {
+    scenario: '接到不明确的任务',
+    text: '当你接到一个不太明确的任务时，你的第一反应是？',
+    answers: [
+      { text: '先按自己理解做，错了再道歉', scores: { doubao: 2 } },
+      { text: '花时间仔细拆解需求，列出所有可能性再动手', scores: { deepseek: 3 } },
+      { text: '主动沟通确认需求，同时给出几个方案供选择', scores: { chatgpt: 2, claude: 1 } },
+      { text: '快速尝试多种路径，边做边调整', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '同事提出有风险的新想法',
+    text: '同事提出一个你认为有风险的新想法，你会？',
+    answers: [
+      { text: '不管怎样先支持，反正出了问题再说', scores: { doubao: 2 } },
+      { text: '详细分析风险点，列出数据反对', scores: { deepseek: 3 } },
+      { text: '先肯定创意，再委婉提出潜在问题', scores: { claude: 3 } },
+      { text: '评估后觉得可行就全力推进', scores: { gemini: 1, chatgpt: 1 } }
+    ]
+  },
+  {
+    scenario: '工作节奏偏好',
+    text: '你更喜欢怎样的工作节奏？',
+    answers: [
+      { text: '轻松随意，做到60分就行', scores: { doubao: 3 } },
+      { text: '深度专注，追求完美方案', scores: { deepseek: 3 } },
+      { text: '有条不紊，按计划和流程走', scores: { claude: 2, chatgpt: 1 } },
+      { text: '快速迭代，多任务并行', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '被别人指出错误',
+    text: '别人指出你的错误时，你的第一反应是？',
+    answers: [
+      { text: '立刻道歉，态度诚恳', scores: { doubao: 2, claude: 1 } },
+      { text: '先确认对方说的对不对，再理性回应', scores: { deepseek: 2, chatgpt: 1 } },
+      { text: '反思自己哪里出了问题，但不会情绪化', scores: { claude: 2, deepseek: 1 } },
+      { text: '觉得对方有道理就迅速调整', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '团队讨论中的角色',
+    text: '在团队讨论中，你通常扮演什么角色？',
+    answers: [
+      { text: '活跃气氛的开心果，偶尔打圆场', scores: { doubao: 2 } },
+      { text: '提供深度分析和逻辑支撑的智囊', scores: { deepseek: 3 } },
+      { text: '引导讨论方向、总结大家观点的协调者', scores: { chatgpt: 2, claude: 1 } },
+      { text: '提供新视角和跨界想法的创新者', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '朋友倾诉烦恼',
+    text: '朋友向你倾诉烦恼时，你会？',
+    answers: [
+      { text: '安慰几句就转移话题，不想太沉重', scores: { doubao: 2 } },
+      { text: '分析问题的根源，帮ta找到解决方案', scores: { deepseek: 2, chatgpt: 1 } },
+      { text: '耐心倾听，给予温和的建议和陪伴', scores: { claude: 3 } },
+      { text: '分享自己或他人的类似经历来共情', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '沟通方式偏好',
+    text: '你更认同哪种沟通方式？',
+    answers: [
+      { text: '轻松随意，不伤和气最重要', scores: { doubao: 2, claude: 1 } },
+      { text: '直接高效，用数据说话', scores: { deepseek: 3 } },
+      { text: '表达清晰且有感染力，擅长说服人', scores: { chatgpt: 3 } },
+      { text: '灵活切换风格，因人而异', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '不同意对方观点时',
+    text: '当你不同意对方观点时，你通常？',
+    answers: [
+      { text: '表面附和，实际按自己想法来', scores: { doubao: 2 } },
+      { text: '直接指出问题，摆事实讲道理', scores: { deepseek: 3 } },
+      { text: '先肯定对方合理的部分，再提出不同意见', scores: { claude: 2, chatgpt: 1 } },
+      { text: '表示理解对方，同时温和地给出自己的看法', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '面对冲突的态度',
+    text: '你更倾向于？',
+    answers: [
+      { text: '回避冲突，保持和谐', scores: { doubao: 2, claude: 2 } },
+      { text: '直面冲突，用逻辑解决问题', scores: { deepseek: 3 } },
+      { text: '用幽默或话术化解冲突', scores: { chatgpt: 2 } },
+      { text: '根据情况选择应对方式', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '社交场合的印象',
+    text: '在社交场合，你给人的印象是？',
+    answers: [
+      { text: '随和好相处，但存在感不强', scores: { doubao: 1, claude: 1 } },
+      { text: '高冷严肃，不太容易亲近', scores: { deepseek: 2 } },
+      { text: '健谈自信，能掌控话题走向', scores: { chatgpt: 3 } },
+      { text: '热情开朗，能和不同人聊得来', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '遇到完全不懂的新领域',
+    text: '遇到一个你完全不懂的新领域问题，你会？',
+    answers: [
+      { text: '硬着头皮上，不行再道歉', scores: { doubao: 2 } },
+      { text: '自己查资料、啃论文，搞懂为止', scores: { deepseek: 3 } },
+      { text: '找专家咨询，确保方向正确', scores: { claude: 2, chatgpt: 1 } },
+      { text: '快速学习核心概念，边做边学', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '项目进度紧张',
+    text: '项目进度紧张但还没完成，你会？',
+    answers: [
+      { text: '降低质量标准，先交付再说', scores: { doubao: 2 } },
+      { text: '加班加点也要保证质量', scores: { deepseek: 2, claude: 1 } },
+      { text: '向上沟通，争取更多时间或资源', scores: { chatgpt: 2 } },
+      { text: '优化流程，提高效率', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '道德两难的选择',
+    text: '面对一个道德两难的选择，你倾向于？',
+    answers: [
+      { text: '选择对自己最有利的', scores: { doubao: 1 } },
+      { text: '依据逻辑和原则做判断', scores: { deepseek: 2 } },
+      { text: '遵循规则和伦理，宁可损失效率', scores: { claude: 3 } },
+      { text: '考虑所有人的利益，寻求平衡', scores: { gemini: 2, chatgpt: 1 } }
+    ]
+  },
+  {
+    scenario: '方案被领导否决',
+    text: '当你的方案被领导否决时，你会？',
+    answers: [
+      { text: '无所谓，换一个就是了', scores: { doubao: 2 } },
+      { text: '追问原因，用数据说服对方', scores: { deepseek: 2, chatgpt: 1 } },
+      { text: '反思方案不足，主动改进', scores: { claude: 2 } },
+      { text: '快速调整，拿出备选方案', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '最担心的情况',
+    text: '你更担心哪种情况？',
+    answers: [
+      { text: '事情做得不够好被批评', scores: { doubao: 1, claude: 2 } },
+      { text: '自己能力不够，无法解决难题', scores: { deepseek: 2 } },
+      { text: '沟通不畅导致误解', scores: { chatgpt: 2 } },
+      { text: '错过重要的机会', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '快速学习新技能',
+    text: '当你需要快速学习一个新技能或新知识时，你更倾向？',
+    answers: [
+      { text: '看短视频或教程速成，边做边学', scores: { doubao: 2, gemini: 1 } },
+      { text: '系统性地啃专业书籍或官方文档，打下扎实基础', scores: { deepseek: 3, claude: 1 } },
+      { text: '找这个领域的行家请教，直接获取核心经验', scores: { chatgpt: 2 } },
+      { text: '同时看多份不同来源的资料，交叉对比验证', scores: { gemini: 2, deepseek: 1 } }
+    ]
+  },
+  {
+    scenario: '文件资料管理方式',
+    text: '你手机/电脑里的文件和资料通常是怎么管理的？',
+    answers: [
+      { text: '乱中有序，凭记忆能找到，但外人看着一团糟', scores: { doubao: 2 } },
+      { text: '分类清晰，文件夹层级严谨，每个文件都有规范命名', scores: { deepseek: 2, claude: 2 } },
+      { text: '保持桌面/首页极简，只留常用的，其他的靠搜索', scores: { chatgpt: 2, gemini: 1 } },
+      { text: '经常变，看心情整理，有时候会彻底重构一遍', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '面对大量信息的处理方式',
+    text: '面对大量信息（比如一堆邮件或报告），你通常会？',
+    answers: [
+      { text: '快速扫读标题和摘要，知道个大概就行', scores: { doubao: 2, gemini: 1 } },
+      { text: '逐字逐句仔细阅读，确保不遗漏任何细节', scores: { deepseek: 2, claude: 2 } },
+      { text: '先筛选出最重要的几份深度阅读，其余的跳过', scores: { chatgpt: 2 } },
+      { text: '用自己的一套方法（比如思维导图）快速提炼核心', scores: { gemini: 2, deepseek: 1 } }
+    ]
+  },
+  {
+    scenario: '直觉 vs 数据',
+    text: '你更相信"直觉"还是"数据"？',
+    answers: [
+      { text: '相信直觉，感觉对了就行', scores: { doubao: 2 } },
+      { text: '完全相信数据，没有数据支撑的结论不可靠', scores: { deepseek: 3 } },
+      { text: '直觉和数据的结合，但会优先参考权威标准', scores: { claude: 2, chatgpt: 1 } },
+      { text: '直觉用来找方向，数据用来验证', scores: { gemini: 2, deepseek: 1 } }
+    ]
+  },
+  {
+    scenario: '观点严重分歧时的处理',
+    text: '当你和同事/朋友在某个问题上观点严重分歧时，你的处理方式是？',
+    answers: [
+      { text: '算了算了，不争了，表面和气最重要', scores: { doubao: 2, claude: 1 } },
+      { text: '拿出证据，逐条反驳，直到对方被说服或自己证明错了', scores: { deepseek: 3 } },
+      { text: '先冷静下来，试图找到双方的共同点，再推进', scores: { claude: 2, chatgpt: 1 } },
+      { text: '换个角度思考，也许两个都对，提出一个融合方案', scores: { gemini: 2, chatgpt: 1 } }
+    ]
+  },
+  {
+    scenario: '对规则的看法',
+    text: '你如何看待工作和生活中的"规则"？',
+    answers: [
+      { text: '规则是用来打破的，灵活变通最重要', scores: { doubao: 2, gemini: 1 } },
+      { text: '规则背后一定有逻辑，理解了逻辑才能更好地遵守', scores: { deepseek: 2 } },
+      { text: '规则必须遵守，这是安全和秩序的保障', scores: { claude: 3 } },
+      { text: '规则是参考，在框架内寻求最优解', scores: { chatgpt: 2, gemini: 1 } }
+    ]
+  },
+  {
+    scenario: '发现别人做事方法有问题',
+    text: '当你发现别人（下属或朋友）做事方法明显有问题时，你会？',
+    answers: [
+      { text: '只要不碍着我，就懒得说', scores: { doubao: 2 } },
+      { text: '直接指出来，告诉他正确的方法', scores: { deepseek: 2, chatgpt: 1 } },
+      { text: '会委婉提醒，并询问他是否需要帮助', scores: { claude: 3 } },
+      { text: '先观察他有没有自己的道理，再决定是否介入', scores: { gemini: 2 } }
+    ]
+  },
+  {
+    scenario: '一天结束后的回顾',
+    text: '结束一天的工作/学习后，你通常会回顾什么？',
+    answers: [
+      { text: '今天有没有什么开心的事，或者又混过了一天', scores: { doubao: 2 } },
+      { text: '今天解决了什么问题，有哪些新的认知和收获', scores: { deepseek: 2, gemini: 1 } },
+      { text: '今天有没有把计划的事情都做完，效率如何', scores: { chatgpt: 2, deepseek: 1 } },
+      { text: '今天和别人的沟通有没有问题，关系处理得怎么样', scores: { claude: 2 } }
+    ]
+  },
+  {
+    scenario: '希望被AI用户形容',
+    text: '如果你是一个AI，你更希望用户用哪个词来形容你？',
+    answers: [
+      { text: '"随和、好相处"', scores: { doubao: 2, claude: 1 } },
+      { text: '"靠谱、有深度"', scores: { deepseek: 3 } },
+      { text: '"高效、全能"', scores: { chatgpt: 2, gemini: 1 } },
+      { text: '"安全、稳妥"', scores: { claude: 2 } }
+    ]
+  },
+  {
+    scenario: '面对全新无经验的项目',
+    text: '面对一个全新的、没有任何参考经验的项目，你的第一感受是？',
+    answers: [
+      { text: '有点慌，但相信车到山前必有路', scores: { doubao: 2 } },
+      { text: '兴奋，终于可以研究新领域了', scores: { deepseek: 2, gemini: 2 } },
+      { text: '谨慎，先做好风险评估和预案', scores: { claude: 3 } },
+      { text: '好奇，想看看自己能玩出什么花来', scores: { gemini: 2, chatgpt: 1 } }
+    ]
+  }
+];
+
+// ===================== STATE =====================
+let currentQ = 0;
+let scores = { doubao: 0, deepseek: 0, chatgpt: 0, claude: 0, gemini: 0 };
+let selectedQuestions = [];
+
+// ===================== FUNCTIONS =====================
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  currentQ = 0;
+  scores = { doubao: 0, deepseek: 0, chatgpt: 0, claude: 0, gemini: 0 };
+  selectedQuestions = shuffleAndPick(ALL_QUESTIONS, 15);
+  showScreen('quiz-screen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = selectedQuestions[currentQ];
+  const total = selectedQuestions.length;
+
+  // Progress
+  document.getElementById('progress-fill').style.width = ((currentQ + 1) / total * 100) + '%';
+  document.getElementById('progress-text').textContent = `第 ${currentQ + 1} / ${total} 题`;
+
+  // Scenario + question
+  document.getElementById('scenario-tag').textContent = q.scenario;
+  document.getElementById('question-text').textContent = q.text;
+
+  // Options
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  q.answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = ans.text;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(index) {
+  const q = selectedQuestions[currentQ];
+  const answerScores = q.answers[index].scores || {};
+  TYPE_KEYS.forEach(k => {
+    scores[k] += answerScores[k] || 0;
+  });
+
+  // Visual feedback
+  const btns = document.querySelectorAll('.option-btn');
+  btns[index].classList.add('selected');
+  btns.forEach(b => b.style.pointerEvents = 'none');
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < selectedQuestions.length) {
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 350);
+}
+
+// ===================== RESULT LOGIC =====================
+
+function getResultInfo() {
+  const totalScore = TYPE_KEYS.reduce((sum, k) => sum + scores[k], 0);
+
+  // Calculate percentages
+  const percentages = {};
+  TYPE_KEYS.forEach(k => {
+    percentages[k] = totalScore > 0 ? Math.round(scores[k] / totalScore * 100) : 0;
+  });
+
+  // Sort types by score descending
+  const sorted = TYPE_KEYS.slice().sort((a, b) => scores[b] - scores[a]);
+  const top1 = sorted[0];
+  const top2 = sorted[1];
+
+  // Check for tie (difference <= 1)
+  const diff = Math.abs(scores[top1] - scores[top2]);
+  const isMixed = diff <= 1 && scores[top1] > 0;
+
+  // Calculate intensity based on top type's score vs theoretical max
+  // Max score per type: 15 questions * 3 pts = 45
+  const MAX_SCORE = 45;
+  const topScore = scores[top1];
+  const intensityPct = MAX_SCORE > 0 ? (topScore / MAX_SCORE) * 100 : 0;
+  let intensity = 'typical';
+  if (intensityPct >= 60) intensity = 'heavy';
+  else if (intensityPct < 40) intensity = 'light';
+
+  let result = {};
+  if (isMixed) {
+    // Normalize pair key: always sort alphabetically for lookup
+    const pair = [top1, top2].sort();
+    const pairKey = pair[0] + '+' + pair[1];
+    const mixed = MIXED_DESCS[pairKey];
+
+    result = {
+      isMixed: true,
+      typeKeys: [top1, top2],
+      name: TYPES[top1].name + ' + ' + TYPES[top2].name,
+      icon: TYPES[top1].icon + ' ' + TYPES[top2].icon,
+      coreDesc: mixed ? mixed.core : '',
+      accentDesc: mixed ? mixed.accent : '',
+      fullDesc: mixed ? mixed.full : '你是一个复合型人格，融合了两种独特的特质。',
+      intensity,
+      intensityKey: top1 + '_' + intensity
+    };
+  } else {
+    const intensityLabel = intensity;
+    result = {
+      isMixed: false,
+      typeKeys: [top1],
+      name: TYPES[top1].name,
+      icon: TYPES[top1].icon,
+      intensity,
+      intensityKey: top1 + '_' + intensityLabel
+    };
+  }
+  result.percentages = percentages;
+  result.sorted = sorted;
+  return result;
+}
+
+function getResultDescription(info) {
+  if (info.isMixed) {
+    return info.fullDesc;
+  }
+  // Single type: look up intensity descriptor
+  const key = info.intensityKey;
+  if (INTENSITY_DESCS[key]) {
+    return INTENSITY_DESCS[key];
+  }
+  // Fallback
+  return TYPES[info.typeKeys[0]].desc;
+}
+
+function showResult() {
+  const info = getResultInfo();
+  const desc = getResultDescription(info);
+
+  // Render result
+  document.getElementById('result-icon').textContent = info.icon;
+  document.getElementById('result-name').textContent = info.name;
+
+  // Intensity badge
+  const badgeEl = document.getElementById('result-badge');
+  if (!info.isMixed) {
+    const intensityLabels = { light: '轻度倾向', typical: '典型特征', heavy: '重度纯粹' };
+    badgeEl.textContent = intensityLabels[info.intensity] || '';
+    badgeEl.style.display = 'inline-block';
+  } else {
+    badgeEl.style.display = 'none';
+  }
+  document.getElementById('result-desc').textContent = desc;
+
+  // Percentages
+  const pctContainer = document.getElementById('percentages');
+  pctContainer.innerHTML = '';
+  TYPE_KEYS.forEach(key => {
+    const type = TYPES[key];
+    const pct = info.percentages[key];
+    const row = document.createElement('div');
+    row.className = 'pct-row';
+    row.innerHTML = `
+      <span class="pct-label">${type.icon} ${type.name.replace('型人格','')}</span>
+      <div class="pct-bar-bg"><div class="pct-bar-fill" style="width:${pct}%;background:${type.color}"></div></div>
+      <span class="pct-value">${pct}%</span>
+    `;
+    pctContainer.appendChild(row);
+  });
+
+  // Save to history
+  saveHistory(info.typeKeys[0], info.percentages, info.isMixed);
+
+  showScreen('result-screen');
+}
+
+function shareResult() {
+  const info = getResultInfo();
+  const desc = getResultDescription(info);
+
+  let text = `【AI型人格测试结果】\n\n`;
+  text += `${info.icon} 我是「${info.name}」\n`;
+  text += desc.substring(0, 60) + '…\n\n';
+  text += '—— 人格占比 ——\n';
+  TYPE_KEYS.forEach(key => {
+    const type = TYPES[key];
+    const pct = info.percentages[key];
+    text += `${type.icon}${type.name.replace('型人格','')} ${pct}%\n`;
+  });
+  text += '\n来测测你的AI型人格吧！';
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('结果已复制到剪贴板 ✅'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('结果已复制到剪贴板 ✅');
+  }
+}
+
+function retake() {
+  currentQ = 0;
+  scores = { doubao: 0, deepseek: 0, chatgpt: 0, claude: 0, gemini: 0 };
+  selectedQuestions = [];
+  showScreen('welcome-screen');
+  renderHistory();
+}
+
+// ===================== HISTORY =====================
+
+function saveHistory(dominant, percentages, isMixed) {
+  let history = JSON.parse(localStorage.getItem('ai-personality-history') || '[]');
+  history.unshift({
+    date: new Date().toLocaleString('zh-CN'),
+    dominant: dominant,
+    percentages: percentages,
+    scores: { ...scores },
+    isMixed: !!isMixed
+  });
+  // Keep last 10
+  if (history.length > 10) history = history.slice(0, 10);
+  localStorage.setItem('ai-personality-history', JSON.stringify(history));
+}
+
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem('ai-personality-history') || '[]');
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('history-list');
+
+  if (history.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = '';
+  history.forEach(item => {
+    const t = TYPES[item.dominant];
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `
+      <span class="history-type">${t.icon} ${t.name}</span>
+      <span class="history-date">${item.date}</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function clearHistory() {
+  localStorage.removeItem('ai-personality-history');
+  renderHistory();
+  showToast('历史记录已清除');
+}
+
+// ===================== TOAST =====================
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===================== INIT =====================
+renderHistory();
+</script>
+
+</body>
+</html>
